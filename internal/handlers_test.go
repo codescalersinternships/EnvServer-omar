@@ -88,7 +88,6 @@ func TestGet(t *testing.T) {
 	})
 }
 
-
 func assertStatus(t testing.TB, got, want int) {
 	t.Helper()
 	if got != want {
