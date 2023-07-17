@@ -18,8 +18,9 @@ cd EnvServer
 
 2. Start the EnvServer using Docker Compose:
 ```bash
-docker-compose up -d
+PORT=${PORT} docker-compose up -d
 ```
+`${PORT}` the port number server will be listening on
 
 ## Endpoints
 

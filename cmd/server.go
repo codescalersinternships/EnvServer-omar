@@ -1,16 +1,20 @@
 package main
 
 import (
+	"flag"
 	"log"
-	"net/http"
 
 	"github.com/codescalersinternships/EnvServer-omar/internal"
 )
 
 func main() {
-	server := &internal.EnvServer{Env: &internal.HostEnvVariables{}}
+	var port int
+	flag.IntVar(&port, "p", 8080, "specify port number")
 
-	port := "8080"
-	println("Server is listening on port " + port)
-	log.Fatal(http.ListenAndServe(":"+port, server))
+	flag.Parse()
+
+	app := internal.NewApp(port)
+	if err := app.Run(); err != nil {
+		log.Fatal(err)
+	}
 }

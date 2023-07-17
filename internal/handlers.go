@@ -22,7 +22,8 @@ func (e *EnvServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch {
 	case r.Method == http.MethodGet &&
-		((partsCount == 1 && urlParts[0] == "env") || (partsCount == 2 && urlParts[0] == "env" && urlParts[1] == "")):
+		((partsCount == 1 && urlParts[0] == "env") ||
+			(partsCount == 2 && urlParts[0] == "env" && urlParts[1] == "")):
 		fmt.Fprint(w, e.Env.getAll())
 	case r.Method == http.MethodGet && partsCount == 2 && urlParts[0] == "env":
 		fmt.Fprint(w, e.Env.get(urlParts[1]))
