@@ -16,4 +16,4 @@ FROM alpine:3.18
 COPY --from=builder /build/app .
 
 # executable
-ENTRYPOINT [ "./app" ]
+ENTRYPOINT [ "./app", "-p", "8080" ]

@@ -1,73 +1,45 @@
 package internal
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
-	"sort"
-	"strings"
+	"os"
 	"testing"
 )
 
-type subEnvVariables struct {
-	variables map[string]string
-}
-
-func (s *subEnvVariables) getAll() []string {
-	values := []string{}
-	for k, v := range s.variables {
-		values = append(values, fmt.Sprintf("%v=%v", k, v))
-	}
-	return values
-}
-
-func (s *subEnvVariables) get(key string) string {
-	return s.variables[key]
-}
-
 func TestGetAll(t *testing.T) {
-	server := &EnvServer{Env: &subEnvVariables{
-		variables: map[string]string{"key1": "value1", "key2": "value2"},
-	}}
-	values := []string{"key1=value1", "key2=value2"}
-
 	t.Run("get all", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/env", nil)
 		response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+		envHandler(response, request)
 
 		assertStatus(t, response.Code, http.StatusOK)
 
 		gotStr := response.Body.String()
-		got := strings.Split(gotStr[1:len(gotStr)-1], " ")
-		sort.Strings(got)
+		want, _ := json.Marshal(os.Environ())
 
-		if !reflect.DeepEqual(got, values) {
-			t.Errorf("got %v want %v", got, values)
+		if gotStr != string(want) {
+			t.Errorf("got %q want %q", gotStr, string(want))
 		}
 	})
 }
 
 func TestGet(t *testing.T) {
-	server := EnvServer{Env: &subEnvVariables{
-		variables: map[string]string{"key1": "value1", "key2": "value2"},
-	}}
-
 	t.Run("get existing key", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/env/key1", nil)
+		request, _ := http.NewRequest(http.MethodGet, "/env/PATH", nil)
 		response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+		envHandler(response, request)
 
 		assertStatus(t, response.Code, http.StatusOK)
 
-		got := response.Body.String()
-		want := "value1"
+		gotStr := response.Body.String()
+		want, _ := json.Marshal(os.Getenv("PATH"))
 
-		if got != want {
-			t.Errorf("got %v want %v", got, want)
+		if gotStr != string(want) {
+			t.Errorf("got %q want %q", gotStr, string(want))
 		}
 	})
 
@@ -75,26 +47,33 @@ func TestGet(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/env/notfound", nil)
 		response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+		envHandler(response, request)
 
 		assertStatus(t, response.Code, http.StatusOK)
 
-		got := response.Body.String()
-		want := ""
+		gotStr := response.Body.String()
+		want, _ := json.Marshal(os.Getenv("notfound"))
 
-		if got != want {
-			t.Errorf("got %v want %v", got, want)
+		if gotStr != string(want) {
+			t.Errorf("got %q want %q", gotStr, string(want))
 		}
+	})
+
+	t.Run("get empty key", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/env/", nil)
+		response := httptest.NewRecorder()
+
+		envHandler(response, request)
+
+		assertStatus(t, response.Code, http.StatusBadRequest)
 	})
 }
 
 func Test404(t *testing.T) {
-	server := EnvServer{Env: &subEnvVariables{}}
-
 	request, _ := http.NewRequest(http.MethodGet, "/envNotfound", nil)
 	response := httptest.NewRecorder()
 
-	server.ServeHTTP(response, request)
+	envHandler(response, request)
 
 	assertStatus(t, response.Code, http.StatusNotFound)
 }

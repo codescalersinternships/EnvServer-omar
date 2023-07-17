@@ -12,15 +12,14 @@ To quickly set up and run the EnvServer, follow these steps:
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd EnvServer
+git clone git@github.com:codescalersinternships/EnvServer-omar.git
+cd EnvServer-omar
 ```
 
 2. Start the EnvServer using Docker Compose:
 ```bash
-PORT=${PORT} docker-compose up -d
+docker-compose up -d
 ```
-`${PORT}` the port number server will be listening on
 
 ## Endpoints
 
