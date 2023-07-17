@@ -16,13 +16,17 @@ type EnvServer struct {
 	Env variables
 }
 
-// HandleEnv is an endpoint gets all the environment variables on the host.
-func (e *EnvServer) HandleEnv(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, e.Env.getAll())
-}
+func (e *EnvServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	urlParts := strings.Split(r.URL.Path, "/")[1:]
+	partsCount := len(urlParts)
 
-// HandleEnvKey is an endpoint gets value of environment variable on the host.
-func (e *EnvServer) HandleEnvKey(w http.ResponseWriter, r *http.Request) {
-	key := strings.TrimPrefix(r.URL.Path, "/env/")
-	fmt.Fprint(w, e.Env.get(key))
+	switch {
+	case r.Method == http.MethodGet &&
+		((partsCount == 1 && urlParts[0] == "env") || (partsCount == 2 && urlParts[0] == "env" && urlParts[1] == "")):
+		fmt.Fprint(w, e.Env.getAll())
+	case r.Method == http.MethodGet && partsCount == 2 && urlParts[0] == "env":
+		fmt.Fprint(w, e.Env.get(urlParts[1]))
+	default:
+		w.WriteHeader(http.StatusNotFound)
+	}
 }

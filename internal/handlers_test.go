@@ -27,16 +27,16 @@ func (s *subEnvVariables) get(key string) string {
 }
 
 func TestGetAll(t *testing.T) {
-	server := EnvServer{Env: &subEnvVariables{
+	server := &EnvServer{Env: &subEnvVariables{
 		variables: map[string]string{"key1": "value1", "key2": "value2"},
 	}}
 	values := []string{"key1=value1", "key2=value2"}
 
 	t.Run("get all", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/env/", nil)
+		request, _ := http.NewRequest(http.MethodGet, "/env", nil)
 		response := httptest.NewRecorder()
 
-		server.HandleEnv(response, request)
+		server.ServeHTTP(response, request)
 
 		assertStatus(t, response.Code, http.StatusOK)
 
@@ -59,7 +59,7 @@ func TestGet(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/env/key1", nil)
 		response := httptest.NewRecorder()
 
-		server.HandleEnvKey(response, request)
+		server.ServeHTTP(response, request)
 
 		assertStatus(t, response.Code, http.StatusOK)
 
@@ -75,7 +75,7 @@ func TestGet(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/env/notfound", nil)
 		response := httptest.NewRecorder()
 
-		server.HandleEnvKey(response, request)
+		server.ServeHTTP(response, request)
 
 		assertStatus(t, response.Code, http.StatusOK)
 
@@ -88,9 +88,20 @@ func TestGet(t *testing.T) {
 	})
 }
 
+func Test404(t *testing.T) {
+	server := EnvServer{Env: &subEnvVariables{}}
+
+	request, _ := http.NewRequest(http.MethodGet, "/envNotfound", nil)
+	response := httptest.NewRecorder()
+
+	server.ServeHTTP(response, request)
+
+	assertStatus(t, response.Code, http.StatusNotFound)
+}
+
 func assertStatus(t testing.TB, got, want int) {
 	t.Helper()
 	if got != want {
-		t.Errorf("did not get correct status, got %d, want %d", got, want)
+		t.Fatalf("did not get correct status, got %d, want %d", got, want)
 	}
 }
