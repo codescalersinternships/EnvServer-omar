@@ -13,8 +13,10 @@ func main() {
 
 	flag.Parse()
 
-	app := internal.NewApp(port)
-	if err := app.Run(); err != nil {
+	app, err := internal.NewApp(port)
+	if err != nil {
 		log.Fatal(err)
 	}
+
+	app.Run()
 }
