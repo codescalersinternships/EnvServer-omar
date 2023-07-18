@@ -9,13 +9,18 @@ import (
 )
 
 func envHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
 	urlParts := strings.Split(r.URL.Path, "/")[1:]
 	partsCount := len(urlParts)
 
 	switch {
-	case r.Method == http.MethodGet && (partsCount == 1 && urlParts[0] == "env"):
+	case partsCount == 1 && urlParts[0] == "env":
 		getAllEnv(w)
-	case r.Method == http.MethodGet && partsCount == 2 && urlParts[0] == "env":
+	case partsCount == 2 && urlParts[0] == "env":
 		getEnv(w, urlParts[1])
 	default:
 		w.WriteHeader(http.StatusNotFound)
