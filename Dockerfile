@@ -1,19 +1,15 @@
 # builder image
-FROM golang:1.20.5-alpine3.18 as builder
+FROM golang:1.20.5
 
-RUN mkdir /build
+WORKDIR /app
 
-COPY . /build/
+COPY go.mod ./
+RUN go mod download
 
-WORKDIR /build
+COPY . ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -o app ./cmd/server.go
+RUN go build -o app ./cmd/server.go
 
+EXPOSE 8080
 
-# generate clean, final image for end users
-FROM alpine:3.18
-
-COPY --from=builder /build/app .
-
-# executable
-ENTRYPOINT [ "./app", "-p", "8080" ]
+CMD [ "./app","-p","8080" ]

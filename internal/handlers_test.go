@@ -70,12 +70,24 @@ func TestGet(t *testing.T) {
 }
 
 func Test404(t *testing.T) {
-	request, _ := http.NewRequest(http.MethodGet, "/envNotfound", nil)
-	response := httptest.NewRecorder()
+	t.Run("wrong route", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/envNotfound", nil)
+		response := httptest.NewRecorder()
+	
+		envHandler(response, request)
+	
+		assertStatus(t, response.Code, http.StatusNotFound)
+	})
 
-	envHandler(response, request)
+	t.Run("wrong request method", func(t *testing.T) {
 
-	assertStatus(t, response.Code, http.StatusNotFound)
+		request, _ := http.NewRequest(http.MethodPost, "/env", nil)
+		response := httptest.NewRecorder()
+	
+		envHandler(response, request)
+	
+		assertStatus(t, response.Code, http.StatusNotFound)
+	})
 }
 
 func assertStatus(t testing.TB, got, want int) {
