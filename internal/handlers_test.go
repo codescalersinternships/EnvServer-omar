@@ -73,9 +73,9 @@ func Test404(t *testing.T) {
 	t.Run("wrong route", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/envNotfound", nil)
 		response := httptest.NewRecorder()
-	
+
 		envHandler(response, request)
-	
+
 		assertStatus(t, response.Code, http.StatusNotFound)
 	})
 
@@ -83,9 +83,9 @@ func Test404(t *testing.T) {
 
 		request, _ := http.NewRequest(http.MethodPost, "/env", nil)
 		response := httptest.NewRecorder()
-	
+
 		envHandler(response, request)
-	
+
 		assertStatus(t, response.Code, http.StatusNotFound)
 	})
 }
