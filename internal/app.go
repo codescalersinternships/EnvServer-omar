@@ -2,7 +2,6 @@ package internal
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -23,9 +22,11 @@ func NewApp(port int) (App, error) {
 }
 
 // Run is the entry point running the api.
-func (a *App) Run() {
+func (a *App) Run() error {
 	http.HandleFunc("/", envHandler)
 
 	println("Server is listening on port " + strconv.Itoa(a.port))
-	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(a.port), nil))
+	err := http.ListenAndServe(":"+strconv.Itoa(a.port), nil)
+
+	return err
 }
